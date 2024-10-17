@@ -1,0 +1,38 @@
+Schema
+-----------------------------------
+Customers (customer_id, name, email)
+Books (book_id, title, author, price)
+Orders (order_id, customer_id, order_date)
+OrderDetails (order_id, book_id, quantity)
+---------------------------------------------
+
+Q1) Write a SQL query to retrieve the top 5 customers who have purchased the most books(by total quantity) over the last year.
+
+Ans:- SELECT c.name, newTable.total_quantity
+		FROM Customers as c
+		join (
+			SELECT o.customer_id, SUM(od.quantity) as total_quantity
+			FROM Orders as o
+			JOIN OrderDetails as od ON o.order_id = od.order_id
+			WHERE o.order_date >= CURDATE() - INTERVAL 1 YEAR
+			GROUP BY o.customer_id
+			ORDER BY total_quantity DESC
+			LIMIT 5
+		) as newTable ON c.customer_id = newTable.customer_id;
+		
+
+Q2) Write a SQL query to calculate the total revenue generated from book sales by each author.
+
+Ans:- SELECT b.author, SUM(od.quantity * b.price) as total_revenue
+		FROM Books as b
+		join OrderDetails as od ON b.book_id = od.book_id
+		GROUP BY b.author;
+	
+Q3) Write a SQL query to retrieve all books that have been ordered more than 10 times, along with the total quantity ordered for each book.
+
+Ans:- SELECT b.title, b.author, SUM(od.quantity) as total_quantity_ordered
+		FROM Books as b
+		join OrderDetails as od ON b.book_id = od.book_id
+		GROUP BY b.book_id, b.title, b.author
+		HAVING SUM(od.quantity) > 10;
+
